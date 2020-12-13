@@ -8,7 +8,8 @@ namespace WorkaroundUtilities
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var builder = new ConfigurationBuilder();
+            BuildConfig(builder);
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
