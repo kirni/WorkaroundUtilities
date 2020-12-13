@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.IO;
@@ -18,6 +19,16 @@ namespace WorkaroundUtilities
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateLogger();
+
+            Log.Logger.Information("Application starting");
+
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    /**/
+                })
+                .UseSerilog()
+                .Build();
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
