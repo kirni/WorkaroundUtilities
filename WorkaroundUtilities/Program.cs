@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.IO;
 
@@ -10,6 +11,13 @@ namespace WorkaroundUtilities
         {
             var builder = new ConfigurationBuilder();
             BuildConfig(builder);
+
+            //setup logging
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Build())
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
