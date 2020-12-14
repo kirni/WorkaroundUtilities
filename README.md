@@ -44,6 +44,9 @@ The default settings aim to cover all options of the latter. Therefore it will b
   }
 }
 ````
+This example will refresh the Chrome browser if a USB drive is plugged ether to *F:*or *G:* **and** if on one on those drives the textfile *refresh.txt*.
+
+If the Chrome browser consumes more than 2000 MB of RAM, the browser will be terminated and restarted via a shortcut from the start menu.
 
 ## Configure the logging
 *Serilog* is used for the logging. Please check the homepage for details https://serilog.net/. Please check out this page https://github.com/serilog/serilog-settings-configuration to figure out what can be done in the *appsettings.json*.
