@@ -1,4 +1,4 @@
-name: ActionExample1.CI
+name: BasicUntestedPublish.CI
 
 on: [push]
 jobs:
@@ -14,7 +14,8 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Publish
       run: dotnet publish --configuration Debug --framework netcoreapp3.1 --runtime win-x86 --self-contained true
-    - uses: actions/upload-artifact@v1
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
       with:
-        name: Upload exe
+        name: WorkaroundUtilities
         path: WorkaroundUtilities\bin\Debug\netcoreapp3.1\win-x86\publish\
