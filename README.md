@@ -73,6 +73,14 @@ In intervals of *eventpollingSec* all *events* are checked in the same order as 
 | FileExistingEvent | list of path to files | is true when **any** of the defined files is existing | *FileExistingEvent{F:/refresh.txt}{G:/refresh.txt}* is true when the file *F:/refresh.txt* **or** the file *G:/refresh.txt* is existing. |
 | RAMlimitEvent | **first** name of the process **second** *long* for RAM in *megabyte* | checks if the defined process together with all it's sub-taks are consuming more than the specified RAM. this is based on [Process.WorkingSet64](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.peakworkingset64?view=net-5.0#System_Diagnostics_Process_PeakWorkingSet64) and might be different to what you can see in the task manager. wrong types in the options or less than two options will currently cause exceptions. Additional options are ignored. | *RAMlimitEvent{Chrome}{2000}* checks if Chrome together with *all sub-tasks* uses more than 2000 MB |
 
+#### implemented actions
+| action name | options | description | example |
+| --- | --- | --- | --- |
+| SendF5Action | list of process names | sets focus to the process and all it's sub-tasks and sends the virtual keyboard input *F5*. The main usecase is to refresh browsers. based on a answer from [stackoverflow](https://stackoverflow.com/questions/26380092/need-to-refresh-chrome-browser-using-c-sharp). | *SendF5Action{Chrome}* should refresh the Chrome browser |
+| TerminateProcessAction | list of process names | terminates a process and all it's sub-tasks. Uses [Process.Kill](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?f1url=%3FappId%3DDev16IDEF1%26l%3DEN-US%26k%3Dk(System.Diagnostics.Process.Kill);k(DevLang-csharp)%26rd%3Dtrue&view=net-5.0). | *TerminateProcessAction{Chrome}* terminates the Chrome browser |
+| StartProcessAction | listof process names | starts a process. Uses [Process.Start](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.start?f1url=%3FappId%3DDev16IDEF1%26l%3DEN-US%26k%3Dk(System.Diagnostics.Process.Start);k(DevLang-csharp)%26rd%3Dtrue&view=net-5.0). | *StartProcessAction{C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk}* starts the Chrome browser via a shortcut. |
+
+
 
 
 
