@@ -13,14 +13,7 @@ namespace WorkaroundUtilities
         static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder();
-            BuildConfig(builder);
-
-            //setup logging
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Build())
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateLogger();            
+            BuildConfig(builder);                     
 
             //for dependency injection, logging etc.
             var host = Host.CreateDefaultBuilder()
@@ -33,6 +26,13 @@ namespace WorkaroundUtilities
                 })
                 .UseSerilog()
                 .Build();
+
+            //setup logging
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Build())
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
 
             var greetingsService = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
             greetingsService.Run();
