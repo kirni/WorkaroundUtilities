@@ -1,6 +1,9 @@
-name: DebugUntestedPublish.CI
+name: MasterPublish.CI
 
-on: [push]
+on:
+  push:
+    branches: 
+      - master
 jobs:
   build:
     runs-on: windows-latest
