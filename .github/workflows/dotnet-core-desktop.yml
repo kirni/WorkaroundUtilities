@@ -1,12 +1,9 @@
 name: ActionExample1.CI
 
 on: [push]
-
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core
@@ -17,3 +14,7 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Publish
       run: dotnet publish --configuration Debug --framework netcoreapp3.1 --runtime win-x86 --self-contained true
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Upload exe
+        path: WorkaroundUtilities\bin\Debug\netcoreapp3.1\win-x86\publish\
