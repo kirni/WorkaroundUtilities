@@ -16,4 +16,4 @@ jobs:
     - name: First build it with dotnet
       run: dotnet build --configuration Debug
     - name: Publish
-      run: dotnet publish --configuration Debug --framework netcoreapp3.1 --runtime win-x64 --self-contained true
+      run: dotnet publish --configuration Debug --framework netcoreapp3.1 --runtime win-x86 --self-contained true
