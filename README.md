@@ -10,6 +10,14 @@ Going into the details of a activity will display the generated artifacts.
 Currently this contains a debug build of the executable, the license, a sample of the [application settings](#Configure-the-WorkaroundUtilities) and this readme file.
 
 # Run the program
-Atthe moment it is a hard requirement to have the [appsettings.json](#Configure-the-WorkaroundUtilities) in the same directory as the exe.
+At the moment it is a hard requirement to have the [appsettings.json](#Configure-the-WorkaroundUtilities) in the working directory.
 
 # Configure the WorkaroundUtilities
+The whole configuration is done in the file *appsettings.json* and consists of two main part - one for the logging and one for the actual workaround handlers.
+
+*Serilog* is used for the logging. Please check the homepage for details https://serilog.net/. Please check out this page https://github.com/serilog/serilog-settings-configuration to figure out what can be done in the *appsettings.json*.
+
+If you don't want to play with the settings, but still want to have the logs in a file, you can simply redirect the standard out:
+![image](https://user-images.githubusercontent.com/12346829/102124550-baf33300-3e48-11eb-93e1-04eb4292ad65.png)
+
+The current default 
