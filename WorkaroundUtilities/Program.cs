@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace WorkaroundUtilities
@@ -18,17 +20,25 @@ namespace WorkaroundUtilities
                 .ReadFrom.Configuration(builder.Build())
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .CreateLogger();
+                .CreateLogger();            
 
-            Log.Logger.Information("Application starting");
-
+            //for dependency injection, logging etc.
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    /**/
+                    //interface is useful to have testing classes implementing the interface
+                    //and not writing to databases etc. 
+                    services.AddTransient<IGreetingService, GreetingService>();
+                    services.AddTransient<IWorkaroundPublisherService, WorkaroundPublisherService>();
                 })
                 .UseSerilog()
                 .Build();
+
+            var greetingsService = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
+            greetingsService.Run();
+
+            var workaroundService = ActivatorUtilities.CreateInstance<WorkaroundPublisherService>(host.Services);
+            workaroundService.Run();
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
@@ -38,5 +48,5 @@ namespace WorkaroundUtilities
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
                 .AddEnvironmentVariables();
         }
-    }
+    }   
 }
