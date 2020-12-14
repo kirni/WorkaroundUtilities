@@ -12,8 +12,6 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 2.2.108
+        dotnet-version: 3.1
     - name: First build it with dotnet
-      run: dotnet build --configuration Release
-    - name: And then we test it
-      run: dotnet test --configuration Release  --no-build --no-restore --verbosity normal 
+      run: dotnet build --configuration Debug
