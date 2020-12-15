@@ -1,6 +1,18 @@
 # Introduction
 The *WorkaroundUtilities* aim to enable workarounds for program issues. This can mean refreshing the browser on certain events, or killing and restarting a process.
 
+# Table of contents
+- [Introduction](#introduction)
+- [Get the program](#get-the-program)
+- [Run the program](#run-the-program)
+- [Configure the WorkaroundUtilities](#configure-the-workaroundutilities)
+  - [Configure the logging](#configure-the-logging)
+  - [Configure the warkaround workers](#configure-the-warkaround-workers)
+    - [workaround options](#workaround-options)
+      - [implemented events](#implemented-events)
+      - [implemented actions](#implemented-actions)
+
+
 # Get the program
 Currently every new source version creates an executable. The recent history can be viewed in the actions: https://github.com/kirni/WorkaroundUtilities/actions
 Going into the details of a activity will display the generated artifacts. 
