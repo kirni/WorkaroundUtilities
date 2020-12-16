@@ -34,11 +34,23 @@ namespace WorkaroundUtilities
                 .WriteTo.Console()
                 .CreateLogger();
 
-            var greetingsService = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
-            greetingsService.Run();
+            try
+            {
 
-            var workaroundService = ActivatorUtilities.CreateInstance<WorkaroundPublisherService>(host.Services);
-            workaroundService.Run();
+                var greetingsService = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
+                greetingsService.Run();
+
+                var workaroundService = ActivatorUtilities.CreateInstance<WorkaroundPublisherService>(host.Services);
+                workaroundService.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "application failed due to unresolved exception");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
