@@ -31,7 +31,6 @@ namespace WorkaroundUtilities
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(builder.Build())
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
                 .CreateLogger();
 
             try
