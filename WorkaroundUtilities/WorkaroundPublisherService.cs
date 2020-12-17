@@ -46,16 +46,7 @@ namespace WorkaroundUtilities
     public class WorkaroundPublisherService : IWorkaroundPublisherService
     {
         private readonly ILogger<WorkaroundPublisherService> _log;
-        private readonly IConfiguration _config;
-
-        public delegate bool WorkaroundEventDelegate(object sender, WorkaroundArgs args);
-        public static ILookup<string, WorkaroundEventDelegate> Events = new Dictionary<string, WorkaroundEventDelegate>()
-        {
-            { "USBconnectedEvent", WorkaroundWorker.USBconnected },
-            {"FileExistingEvent", WorkaroundWorker.FileExisting },
-            {"RAMlimitEvent", WorkaroundWorker.RAMlimit}
-
-        }.ToLookup(o => o.Key, o => o.Value);     
+        private readonly IConfiguration _config;               
 
         public void Run()
         {

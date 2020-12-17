@@ -16,10 +16,11 @@ namespace WorkaroundUtilities
         protected readonly ILogger<WorkaroundPublisherService> _log;
         protected readonly WorkaroundDefinition _definition;
 
-        private readonly WorkaroundActionFactory actionFactory = new WorkaroundActionFactory();
+        private readonly WorkaroundActionFactory _actionFactory = new WorkaroundActionFactory();
+        private readonly WorkaroundEventFactory _eventFactory = new WorkaroundEventFactory();
         
         protected ICollection<IWorkaroundAction> actions;
-        protected IDictionary<WorkaroundPublisherService.WorkaroundEventDelegate, WorkaroundArgs> events;
+        protected ICollection<IWorkaroundEvent> events;
 
         public bool hasActions
         {
@@ -54,15 +55,25 @@ namespace WorkaroundUtilities
                 //match everything until first parameter (indicated by { ) or until the end
                 var key = Regex.Match(inst, @"^([^{])+").ToString();
 
-                if (WorkaroundPublisherService.Events.Contains(key))
+                if (_eventFactory.KnowsType(key))
                 {
                     if (events == null)
                     {
-                        events = new Dictionary<WorkaroundPublisherService.WorkaroundEventDelegate, WorkaroundArgs>();
+                        events = new List<IWorkaroundEvent>();
                     }
 
-                    events.Add(WorkaroundPublisherService.Events[key].First(), new WorkaroundArgs(inst));
-                    _log.LogInformation("added event {event}", key);
+                    IWorkaroundEvent temp = _eventFactory.Create(key);
+
+                    if (temp.TryInit(_log, WorkaroundArgs.ExtractArgs(inst)) == true)
+                    {
+
+                        events.Add(temp);
+                        _log.LogInformation("added event {event}", temp);
+                    }
+                    else
+                    {
+                        _log.LogWarning("skip invalid action {eventDefinition}", inst);
+                    }
                 }
                 else
                 {
@@ -75,14 +86,14 @@ namespace WorkaroundUtilities
                 //match everything until first parameter (indicated by "{") or until the end
                 var key = Regex.Match(inst, @"^([^{])+").ToString();
 
-                if (actionFactory.KnowsType(key))
+                if (_actionFactory.KnowsType(key))
                 {
                     if (actions == null)
                     {
                         actions = new List<IWorkaroundAction>();
                     }
 
-                    IWorkaroundAction temp = actionFactory.Create(key);
+                    IWorkaroundAction temp = _actionFactory.Create(key);
 
                     if (temp.TryInit(_log, WorkaroundArgs.ExtractArgs(inst)) == true)
                     {
@@ -125,7 +136,7 @@ namespace WorkaroundUtilities
                 Thread.Sleep((int)(_definition.eventpollingSec * 1000));
 
                 //call all actions only if all events are true
-                if (events.All(x => x.Key(this, x.Value) == true))
+                if (events.All(x => x.EventOccurred()))
                 {
                     foreach (var inst in actions)
                     {
@@ -139,75 +150,5 @@ namespace WorkaroundUtilities
         {
             return _definition.description;
         }
-
-        public static bool USBconnected(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                //get all USB sticks
-                var drives = DriveInfo.GetDrives()
-                .Where(drive => drive.IsReady && drive.DriveType == DriveType.Removable);
-
-                //event valid when any of the connected drives contains any of the args (G:, F:, etc)
-                return args.args.Any(arg => drives.Any(x => x.Name.Contains(arg)));
-            }
-            else
-            {
-                throw new ArgumentException($"USBconnected expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }
-
-        public static bool FileExisting(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                WorkaroundWorker worker = (WorkaroundWorker)sender;
-                return args.args.Any(x => File.Exists(x));
-            }
-            else
-            {
-                throw new ArgumentException($"FileExisting expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }
-
-        public static bool RAMlimit(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                WorkaroundWorker worker = (WorkaroundWorker)sender;
-
-                string procName = args.args[0];
-                long limit = long.Parse(args.args[1]);
-
-                var procs = Process.GetProcessesByName(procName).ToList();
-
-                if (procs == null || procs.Count <= 0)
-                {
-                    worker._log.LogWarning("{workaround} process {process} not found", worker, procName);
-                    return false;
-                }
-
-                long sumWorkingSet64 = 0;
-                long sumPagedMemorySize64 = 0;
-
-                foreach (Process proc in procs)
-                {
-                    sumWorkingSet64 += proc.WorkingSet64;
-                    sumPagedMemorySize64 += proc.PagedMemorySize64;
-                }
-
-                //calculate in MB
-                if ((sumPagedMemorySize64 / (1024 * 1024)) > limit)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-            else
-            {
-                throw new ArgumentException($"RAMlimit expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }                    
     }
 }

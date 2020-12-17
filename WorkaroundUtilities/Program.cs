@@ -5,6 +5,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace WorkaroundUtilities
 {
@@ -13,7 +14,9 @@ namespace WorkaroundUtilities
         static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder();
-            BuildConfig(builder);                     
+            BuildConfig(builder);
+
+            Thread.CurrentThread.Name = "main";
 
             //for dependency injection, logging etc.
             var host = Host.CreateDefaultBuilder()
