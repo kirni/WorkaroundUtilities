@@ -11,6 +11,11 @@ namespace WorkaroundUtilities
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern uint SendInput(uint numberOfInputs, INPUT[] inputs, int sizeOfInputStructure);
 
+        internal const uint KEYEVENTF_KEYUP = 0x0002;
+        internal const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+        internal const uint KEYEVENTF_SCANCODE = 0x0008;
+        internal const uint KEYEVENTF_UNICODE = 0x0004;
+
         /// <summary>
         /// http://msdn.microsoft.com/en-us/library/windows/desktop/ms646270(v=vs.85).aspx
         /// </summary>
