@@ -32,7 +32,7 @@ namespace WorkaroundUtilities
 
     public class WorkaroundServiceOptions
     {
-        public WorkaroundDefinition[] workarounds { get; set; }
+        public WorkaroundDefinition[] Workarounds { get; set; }
     }
 
     public class WorkaroundDefinition
