@@ -279,18 +279,33 @@ namespace WorkaroundUtilities
                             SendF5Helper.SetForegroundWindow(inst.MainWindowHandle);
 
                             // Create a F5 key press
-                            SendF5Helper.INPUT ip = new SendF5Helper.INPUT { Type = 1 };
-                            ip.Data.Keyboard = new SendF5Helper.KEYBDINPUT();
-                            ip.Data.Keyboard.Vk = (ushort)0x74;  // F5 Key
-                            ip.Data.Keyboard.Scan = 0;
-                            ip.Data.Keyboard.Flags = 0;
-                            ip.Data.Keyboard.Time = 0;
-                            ip.Data.Keyboard.ExtraInfo = IntPtr.Zero;
+                            SendF5Helper.INPUT ipPress = new SendF5Helper.INPUT { Type = 1 };
+                            ipPress.Data.Keyboard = new SendF5Helper.KEYBDINPUT
+                            {
+                                Vk = (ushort)0x74,  // F5 Key
+                                Scan = 0,
+                                Flags = 0,
+                                //50 ms
+                                Time = 0,
+                                ExtraInfo = IntPtr.Zero
+                            };
 
-                            var inputs = new SendF5Helper.INPUT[] { ip };
+                            // Create a F5 key release
+                            SendF5Helper.INPUT ipRelease = new SendF5Helper.INPUT { Type = 1 };
+                            ipRelease.Data.Keyboard = new SendF5Helper.KEYBDINPUT
+                            {
+                                Vk = (ushort)0x74,  // F5 Key
+                                Scan = 0,
+                                Flags = SendF5Helper.KEYEVENTF_KEYUP,
+                                //50 ms
+                                Time = 0,
+                                ExtraInfo = IntPtr.Zero
+                            };
 
-                            // Send the keypress to the window
-                            SendF5Helper.SendInput(1, inputs, Marshal.SizeOf(typeof(SendF5Helper.INPUT)));
+                            var inputs = new SendF5Helper.INPUT[] { ipPress, ipRelease };
+
+                            // Send the keypresses to the window
+                            SendF5Helper.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(SendF5Helper.INPUT)));
 
                             worker._log.LogInformation("{workaround} send F5 to process {process}", worker, procName);
                         }
