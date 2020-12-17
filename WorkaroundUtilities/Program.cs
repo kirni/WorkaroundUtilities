@@ -29,10 +29,7 @@ namespace WorkaroundUtilities
 
             //setup logging
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Build())
-                .Enrich.FromLogContext()
-                .Enrich.WithThreadId()
-                .Enrich.WithThreadName()
+                .ReadFrom.Configuration(builder.Build())              
                 .CreateLogger();
 
             try
