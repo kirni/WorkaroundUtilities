@@ -12,7 +12,7 @@ namespace WorkaroundUtilities
     {
         public string[] args { get; private set; } // readonly
 
-        public static string[] extractArgs(string text)
+        public static string[] ExtractArgs(string text)
         {
             return Regex.Matches(text, @"(?<=\{)(.*?)(?=\})")
                  .Cast<Match>()

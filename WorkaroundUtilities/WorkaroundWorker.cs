@@ -84,7 +84,7 @@ namespace WorkaroundUtilities
 
                     IWorkaroundAction temp = actionFactory.Create(key);
 
-                    if (temp.TryInit(_log, WorkaroundArgs.extractArgs(inst)) == true)
+                    if (temp.TryInit(_log, WorkaroundArgs.ExtractArgs(inst)) == true)
                     {
 
                         actions.Add(temp);
