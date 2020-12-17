@@ -12,6 +12,14 @@ namespace WorkaroundUtilities
     {
         public string[] args { get; private set; } // readonly
 
+        public static string[] extractArgs(string text)
+        {
+            return Regex.Matches(text, @"(?<=\{)(.*?)(?=\})")
+                 .Cast<Match>()
+                 .Select(m => m.Value)
+                 .ToArray();
+        }
+
         public WorkaroundArgs(string text)
         {
             //everything between {} is an argument
@@ -47,16 +55,7 @@ namespace WorkaroundUtilities
             {"FileExistingEvent", WorkaroundWorker.FileExisting },
             {"RAMlimitEvent", WorkaroundWorker.RAMlimit}
 
-        }.ToLookup(o => o.Key, o => o.Value);
-
-        public delegate void WorkaroundActionDelegate(object sender, WorkaroundArgs args);
-        public static ILookup<string, WorkaroundActionDelegate> Actions = new Dictionary<string, WorkaroundActionDelegate>()
-        {
-            { "SendF5Action", WorkaroundWorker.SendF5 },
-            {"TerminateProcessAction", WorkaroundWorker.TerminateProcess },
-            {"StartProcessAction", WorkaroundWorker.StartProcess }
-
-        }.ToLookup(o => o.Key, o => o.Value);
+        }.ToLookup(o => o.Key, o => o.Value);     
 
         public void Run()
         {
@@ -69,7 +68,9 @@ namespace WorkaroundUtilities
                 if (worker.hasActions && worker.hasEvents)
                 {
                     var thread = new Thread(worker.Run);
-                    _log.LogInformation("{workaround} create thread {thread}", worker, thread.ManagedThreadId);
+                    thread.Name = worker.ToString();
+
+                    _log.LogDebug("{workaround} create thread {thread}", worker, thread.ManagedThreadId);
 
                     thread.Start();
                 }

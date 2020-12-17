@@ -16,7 +16,9 @@ namespace WorkaroundUtilities
         protected readonly ILogger<WorkaroundPublisherService> _log;
         protected readonly WorkaroundDefinition _definition;
 
-        protected IDictionary<WorkaroundPublisherService.WorkaroundActionDelegate, WorkaroundArgs> actions;
+        private readonly WorkaroundActionFactory actionFactory = new WorkaroundActionFactory();
+        
+        protected ICollection<IWorkaroundAction> actions;
         protected IDictionary<WorkaroundPublisherService.WorkaroundEventDelegate, WorkaroundArgs> events;
 
         public bool hasActions
@@ -70,18 +72,28 @@ namespace WorkaroundUtilities
 
             foreach (var inst in _definition.actions)
             {
-                //match everything until first parameter (indicated by { ) or until the end
+                //match everything until first parameter (indicated by "{") or until the end
                 var key = Regex.Match(inst, @"^([^{])+").ToString();
 
-                if (WorkaroundPublisherService.Actions.Contains(key))
+                if (actionFactory.KnowsType(key))
                 {
                     if (actions == null)
                     {
-                        actions = new Dictionary<WorkaroundPublisherService.WorkaroundActionDelegate, WorkaroundArgs>();
+                        actions = new List<IWorkaroundAction>();
                     }
 
-                    actions.Add(WorkaroundPublisherService.Actions[key].First(), new WorkaroundArgs(inst));
-                    _log.LogInformation("{workaround} added action {action}", this, key);
+                    IWorkaroundAction temp = actionFactory.Create(key);
+
+                    if (temp.TryInit(_log, WorkaroundArgs.extractArgs(inst)) == true)
+                    {
+
+                        actions.Add(temp);
+                        _log.LogInformation("{workaround} added action {action}", this, temp);
+                    }
+                    else
+                    {
+                        _log.LogWarning("{workaround} skip invalid action {actionDefinition}", this, inst);
+                    }
                 }
                 else
                 {
@@ -117,7 +129,7 @@ namespace WorkaroundUtilities
                 {
                     foreach (var inst in actions)
                     {
-                        inst.Key(this, inst.Value);
+                        inst.Execute();
                     }
                 }
             } while (true);
@@ -196,126 +208,6 @@ namespace WorkaroundUtilities
             {
                 throw new ArgumentException($"RAMlimit expects sender of type {typeof(IWorkaroundWorker)}");
             }
-        }
-
-        public static void TerminateProcess(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                WorkaroundWorker worker = (WorkaroundWorker)sender;
-
-                foreach (var procName in args.args)
-                {
-
-                    var procs = Process.GetProcessesByName(procName).ToList();
-
-                    if (procs == null || procs.Count <= 0)
-                    {
-                        worker._log.LogWarning("{workaround} process {process} not found", worker, procName);
-                        continue;
-                    }
-
-                    procs.ForEach(x => x.Kill());
-                    worker._log.LogInformation("{workaround} process {process} killed", worker, procName);
-                }
-            }
-            else
-            {
-                throw new ArgumentException($"TerminateProcess expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }
-
-        public static void StartProcess(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                WorkaroundWorker worker = (WorkaroundWorker)sender;
-
-                foreach (var procName in args.args)
-                {
-                    var process = new Process();
-                    process.StartInfo.FileName = procName;
-                    process.StartInfo.UseShellExecute = true;
-
-                    process.Start();
-
-                    if (process == null)
-                    {
-                        worker._log.LogInformation("{workaround} failed to start {process}", worker, procName);
-                    }
-                    else
-                    {
-                        worker._log.LogInformation("{workaround} process started {process} ID {ID}", worker, procName, process.Id);
-                    }
-
-                }
-            }
-            else
-            {
-                throw new ArgumentException($"StartProcess expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }
-
-        public static void SendF5(object sender, WorkaroundArgs args)
-        {
-            if (sender is IWorkaroundWorker)
-            {
-                WorkaroundWorker worker = (WorkaroundWorker)sender;
-                foreach (var procName in args.args)
-                {
-                    var procs = Process.GetProcessesByName(procName).ToList();
-
-                    if (procs == null || procs.Count <= 0)
-                    {
-                        worker._log.LogWarning("{workaround} process {process} not found", worker, procName);
-                        return;
-                    }
-
-                    foreach (Process inst in procs)
-                    {
-                        if (inst.MainWindowHandle != IntPtr.Zero)
-                        {
-                            // Set focus on the window so that the key input can be received.
-                            SendF5Helper.SetForegroundWindow(inst.MainWindowHandle);
-
-                            // Create a F5 key press
-                            SendF5Helper.INPUT ipPress = new SendF5Helper.INPUT { Type = 1 };
-                            ipPress.Data.Keyboard = new SendF5Helper.KEYBDINPUT
-                            {
-                                Vk = (ushort)0x74,  // F5 Key
-                                Scan = 0,
-                                Flags = 0,
-                                //50 ms
-                                Time = 0,
-                                ExtraInfo = IntPtr.Zero
-                            };
-
-                            // Create a F5 key release
-                            SendF5Helper.INPUT ipRelease = new SendF5Helper.INPUT { Type = 1 };
-                            ipRelease.Data.Keyboard = new SendF5Helper.KEYBDINPUT
-                            {
-                                Vk = (ushort)0x74,  // F5 Key
-                                Scan = 0,
-                                Flags = SendF5Helper.KEYEVENTF_KEYUP,
-                                //50 ms
-                                Time = 0,
-                                ExtraInfo = IntPtr.Zero
-                            };
-
-                            var inputs = new SendF5Helper.INPUT[] { ipPress, ipRelease };
-
-                            // Send the keypresses to the window
-                            SendF5Helper.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(SendF5Helper.INPUT)));
-
-                            worker._log.LogInformation("{workaround} send F5 to process {process}", worker, procName);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                throw new ArgumentException($"Send keys expects sender of type {typeof(IWorkaroundWorker)}");
-            }
-        }
+        }                    
     }
 }

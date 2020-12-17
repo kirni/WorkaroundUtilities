@@ -20,6 +20,7 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0">
 			<WarningsAsErrors>NU1605</WarningsAsErrors>
 		</PackageReference>
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0">
 			<WarningsAsErrors>NU1605</WarningsAsErrors>
