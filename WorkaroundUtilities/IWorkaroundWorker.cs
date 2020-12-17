@@ -7,5 +7,6 @@
 
         void Run();
         string ToString();
+        void Stop();
     }
 }

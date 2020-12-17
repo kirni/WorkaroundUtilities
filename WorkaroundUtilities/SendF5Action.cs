@@ -18,7 +18,7 @@ namespace WorkaroundUtilities
 
                 if (procs == null || procs.Count <= 0)
                 {
-                    _log.LogWarning("{process {process} not found", procName);
+                    _log.LogWarning("process {process} not found", procName);
                     return;
                 }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -46,11 +47,15 @@ namespace WorkaroundUtilities
     public class WorkaroundPublisherService : IWorkaroundPublisherService
     {
         private readonly ILogger<WorkaroundPublisherService> _log;
-        private readonly IConfiguration _config;               
+        private readonly IConfiguration _config;
+
+        private IDictionary<IWorkaroundWorker, Thread> _workers;
 
         public void Run()
         {
             var workarounds = _config.GetSection("workarounds").Get<WorkaroundDefinition[]>();
+
+            _workers = new Dictionary<IWorkaroundWorker, Thread>();          
 
             foreach (var inst in workarounds)
             {
@@ -58,15 +63,36 @@ namespace WorkaroundUtilities
 
                 if (worker.hasActions && worker.hasEvents)
                 {
-                    var thread = new Thread(worker.Run);
-                    thread.Name = worker.ToString();
+                    var thread = new Thread(worker.Run)
+                    {
+                        Name = worker.ToString()
+                    };
 
                     _log.LogDebug("create thread {thread}", thread.Name);
 
+                    _workers.Add(worker, thread);
                     thread.Start();
                 }
             }
+
+            //_config.GetReloadToken().RegisterChangeCallback(Restart, null);
         }
+
+        /*private void Restart(object obj)
+        {
+            _log.LogInformation("reload appsettings");
+            foreach (var set in _workers)
+            {
+                set.Key.Stop();
+
+            }
+
+            while (_workers.Values.Any(x => x.IsAlive)) ;
+
+            _workers.Clear();
+
+            Run();
+        }*/
 
         public WorkaroundPublisherService(ILogger<WorkaroundPublisherService> log, IConfiguration config)
         {

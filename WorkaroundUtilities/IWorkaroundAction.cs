@@ -28,12 +28,12 @@ namespace WorkaroundUtilities
 
                 if (procs == null || procs.Count <= 0)
                 {
-                    _log.LogWarning("process {process} not found", procName);
+                    _log.LogWarning("{process} not found", procName);
                     continue;
                 }
 
                 procs.ForEach(x => x.Kill());
-                _log.LogInformation("process {process} killed", procName);
+                _log.LogInformation("{process} killed", procName);
             }
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace WorkaroundUtilities
 {
+
     abstract internal class StringFactory<T> where T : class
     {
         private Dictionary<string, Type> _KnownTypes = new Dictionary<string, Type>();

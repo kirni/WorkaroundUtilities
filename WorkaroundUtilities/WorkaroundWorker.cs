@@ -8,6 +8,7 @@ using System.Threading;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Extensions.Options;
 
 namespace WorkaroundUtilities
 {
@@ -18,9 +19,11 @@ namespace WorkaroundUtilities
 
         private readonly WorkaroundActionFactory _actionFactory = new WorkaroundActionFactory();
         private readonly WorkaroundEventFactory _eventFactory = new WorkaroundEventFactory();
-        
+
         protected ICollection<IWorkaroundAction> actions;
         protected ICollection<IWorkaroundEvent> events;
+
+        private bool _stop;
 
         public bool hasActions
         {
@@ -68,16 +71,16 @@ namespace WorkaroundUtilities
                     {
 
                         events.Add(temp);
-                        _log.LogInformation("added event {event}", temp);
+                        _log.LogInformation("added event {event} to {worker}", temp, this);
                     }
                     else
                     {
-                        _log.LogWarning("skip invalid action {eventDefinition}", inst);
+                        _log.LogWarning("skip invalid action {eventDefinition} for {worker}", inst, this);
                     }
                 }
                 else
                 {
-                    _log.LogWarning("skipped unkown event {unknownEvent}", key);
+                    _log.LogWarning("skipped unkown event {unknownEvent} for {worker}", key, this);
                 }
             }
 
@@ -99,26 +102,26 @@ namespace WorkaroundUtilities
                     {
 
                         actions.Add(temp);
-                        _log.LogInformation("added action {action}", temp);
+                        _log.LogInformation("added action {action} to {worker}", temp, this);
                     }
                     else
                     {
-                        _log.LogWarning("skip invalid action {actionDefinition}", inst);
+                        _log.LogWarning("skip invalid action {actionDefinition} for {worker}", inst, this);
                     }
                 }
                 else
                 {
-                    _log.LogWarning("skipped unkown action {unknownAction}", key);
+                    _log.LogWarning("skipped unkown action {unknownAction} for {worker}", key, this);
                 }
             }
 
             if (events == null)
             {
-                _log.LogError("definition has no valid events; worker execution skipped");
+                _log.LogError("definition for {worker} has no valid events; worker execution skipped", this);
             }
             if (actions == null)
             {
-                _log.LogError("definition has no valid actions; worker execution skipped");
+                _log.LogError("definition for {worker} has no valid actions; worker execution skipped", this);
             }
         }
 
@@ -131,7 +134,7 @@ namespace WorkaroundUtilities
         {
             _log.LogInformation("start execution");
 
-            do
+            while(_stop == false)
             {
                 Thread.Sleep((int)(_definition.eventpollingSec * 1000));
 
@@ -143,12 +146,22 @@ namespace WorkaroundUtilities
                         inst.Execute();
                     }
                 }
-            } while (true);
+            }
+
+            _log.LogInformation("stop execution");
+
+            _stop = false;
         }
 
         public override string ToString()
         {
             return _definition.description;
+        }
+
+        //think about nicer way
+        public void Stop()
+        {
+            _stop = true;
         }
     }
 }
