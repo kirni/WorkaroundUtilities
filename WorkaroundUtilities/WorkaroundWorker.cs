@@ -41,13 +41,13 @@ namespace WorkaroundUtilities
             _log = log;
             _definition = definition;
 
-            _log.LogInformation("{workaround} initialize", this);
+            _log.LogDebug("initialize");
 
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
             };
-            _log.LogInformation("{workaround} settings {settings}", this, JsonSerializer.Serialize(_definition, options));
+            _log.LogDebug("settings {settings}", JsonSerializer.Serialize(_definition, options));
 
             foreach (var inst in _definition.events)
             {
@@ -62,11 +62,11 @@ namespace WorkaroundUtilities
                     }
 
                     events.Add(WorkaroundPublisherService.Events[key].First(), new WorkaroundArgs(inst));
-                    _log.LogInformation("{workaround} added event {event}", this, key);
+                    _log.LogInformation("added event {event}", key);
                 }
                 else
                 {
-                    _log.LogWarning("{workaround} skipped unkown event {unknownEvent}", this, key);
+                    _log.LogWarning("skipped unkown event {unknownEvent}", key);
                 }
             }
 
@@ -88,26 +88,26 @@ namespace WorkaroundUtilities
                     {
 
                         actions.Add(temp);
-                        _log.LogInformation("{workaround} added action {action}", this, temp);
+                        _log.LogInformation("added action {action}", temp);
                     }
                     else
                     {
-                        _log.LogWarning("{workaround} skip invalid action {actionDefinition}", this, inst);
+                        _log.LogWarning("skip invalid action {actionDefinition}", inst);
                     }
                 }
                 else
                 {
-                    _log.LogWarning("{workaround} skipped unkown action {unknownAction}", this, key);
+                    _log.LogWarning("skipped unkown action {unknownAction}", key);
                 }
             }
 
             if (events == null)
             {
-                _log.LogError("{workaround} definition has no valid events; worker execution skipped", this);
+                _log.LogError("definition has no valid events; worker execution skipped");
             }
             if (actions == null)
             {
-                _log.LogError("{workaround} definition has no valid actions; worker execution skipped", this);
+                _log.LogError("definition has no valid actions; worker execution skipped");
             }
         }
 
@@ -118,7 +118,7 @@ namespace WorkaroundUtilities
 
         public void Run()
         {
-            _log.LogInformation("{workaround} start execution", this);
+            _log.LogInformation("start execution");
 
             do
             {

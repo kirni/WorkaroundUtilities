@@ -70,7 +70,7 @@ namespace WorkaroundUtilities
                     var thread = new Thread(worker.Run);
                     thread.Name = worker.ToString();
 
-                    _log.LogDebug("{workaround} create thread {thread}", worker, thread.ManagedThreadId);
+                    _log.LogDebug("create thread {thread}", thread.Name);
 
                     thread.Start();
                 }
